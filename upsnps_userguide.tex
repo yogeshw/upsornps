@@ -1,0 +1,106 @@
+\documentclass{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{enumitem}
+
+\title{UPS vs NPS Calculator - User Guide}
+\author{Yogesh Wadadekar}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+This calculator helps compare the University Pension Scheme (UPS) with the National Pension Scheme (NPS) by estimating retirement benefits under both schemes. It takes into account current salary, growth rates, and existing NPS corpus to provide a comprehensive analysis.
+
+\section{Running the Calculator}
+To run the calculator:
+\begin{enumerate}
+    \item Open a terminal
+    \item Navigate to the directory containing upsnpscalculator.py
+    \item Run: python upsnpscalculator.py
+\end{enumerate}
+
+\section{Input Parameters}
+The calculator will prompt for various inputs. You can press Enter to use the default values shown in brackets. Here are the parameters with their default values and explanations:
+
+\subsection{Basic Information}
+\begin{itemize}
+    \item Current Age [53]
+    \item Retirement Age [60]
+    \item Current Annual (Basic + DA) in Lakhs [36.00] \\
+          This is your current Basic Pay plus Dearness Allowance
+    \item Annual Salary Growth Rate [7\%] \\
+          Historical average growth rate in government sector
+    \item Current NPS Corpus in Lakhs [120.00] \\
+          Your accumulated NPS amount so far
+    \item Expected Years of Life After Retirement [20] \\
+          Number of years employee is expected to live after retirement
+    \item Additional Years Spouse May Live [10] \\
+          Number of additional years spouse may live after employee's death
+\end{itemize}
+
+\subsection{NPS Parameters}
+\begin{itemize}
+    \item Employee Contribution Rate [10\%] \\
+          Standard employee contribution rate as per government rules
+    \item Employer Contribution Rate [14\%] \\
+          Current government contribution rate to NPS
+    \item Expected Annual Return on NPS [8\%] \\
+          Conservative estimate based on historical NPS returns
+    \item Annuity Conversion Rate [5\%] \\
+          Current market rate for pension annuities
+\end{itemize}
+
+\subsection{Post-Retirement Parameters}
+\begin{itemize}
+    \item Post-retirement UPS Pension Growth [5\%] \\
+          Based on historical DA increase patterns
+    \item Return on Remaining NPS Corpus [8\%] \\
+          Expected return on the 60\% lump sum amount if invested
+\end{itemize}
+
+\section{Output Explanation}
+The calculator provides:
+\begin{itemize}
+    \item Final basic salary at retirement
+    \item Monthly pension under UPS scheme for:
+    \begin{itemize}
+        \item Employee (50\% of final basic salary)
+        \item Spouse (50\% of employee's pension after employee's death)
+    \end{itemize}
+    \item Total NPS corpus at retirement
+    \item Monthly pension from NPS annuity (40\% of corpus)
+    \item Lump sum amount available (60\% of corpus)
+    \item Year-by-year analysis showing:
+    \begin{itemize}
+        \item Separate phases for employee and spouse periods
+        \item UPS pension amount (reducing to 50\% for spouse)
+        \item NPS annuity amount (remains constant for both phases)
+        \item Yearly difference to be covered by corpus
+        \item Interest earned on remaining corpus
+        \item Remaining corpus balance
+    \end{itemize}
+    \item Analysis of whether the corpus will last through both employee and spouse lifetimes
+    \item Comparative recommendation between UPS and NPS
+\end{itemize}
+
+\section{Important Notes}
+\begin{itemize}
+    \item All monetary inputs (salary and corpus) are in lakhs for convenience
+    \item Rates should be entered as decimals (e.g., 0.07 for 7\%)
+    \item UPS pension calculation:
+    \begin{itemize}
+        \item Employee receives 50\% of final basic salary
+        \item Spouse receives 50\% of employee's pension after employee's death
+        \item UPS pension grows at specified rate (default 5\%) for both phases
+    \end{itemize}
+    \item NPS features:
+    \begin{itemize}
+        \item Only 40\% of NPS corpus is mandatory for annuity purchase
+        \item Annuity amount remains constant for both employee and spouse
+        \item The remaining 60\% lump sum can be invested to cover UPS-NPS difference
+        \item The calculator shows if this corpus will last through both lifetimes
+    \end{itemize}
+\end{itemize}
+
+\end{document}
