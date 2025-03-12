@@ -1,5 +1,7 @@
 # UPS vs NPS Pension Calculator
 
+Copyright © 2025 Yogesh Wadadekar
+
 A Python-based calculator to compare pension benefits between Universal Pension Scheme (UPS) and National Pension System (NPS).
 
 ## Features

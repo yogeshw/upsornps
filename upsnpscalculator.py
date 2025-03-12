@@ -1,3 +1,6 @@
+# Copyright (C) 2025 Yogesh Wadadekar
+# This program is licensed under GPL v3. See LICENSE file for details.
+
 def calculate_final_salary(current_salary, growth_rate, years):
     """
     Calculate the final basic salary at retirement based on compound growth.
