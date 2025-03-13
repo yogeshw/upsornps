@@ -44,7 +44,6 @@ python upsnpscalculator.py
 - NPS corpus and lump sum calculations
 - Detailed corpus depletion analysis
 - Year-by-year breakdown of pension differences
-- Comprehensive recommendation based on calculations
 
 ## Default Values
 

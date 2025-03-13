@@ -229,15 +229,6 @@ def main():
             shortfall_years = total_coverage_needed - depletion_years
             print(f"  WARNING: This is {shortfall_years:.1f} years short of the total needed coverage period!")
         print("  while covering the difference between UPS and NPS pensions")
-    
-    # Recommendation based on monthly pension comparison
-    print("\nRecommendation:")
-    if ups_monthly > nps_monthly:
-        print("  Based on these assumptions, the UPS scheme provides a higher monthly pension.")
-    elif nps_monthly > ups_monthly:
-        print("  Based on these assumptions, the NPS scheme provides a higher monthly pension.")
-    else:
-        print("  Both schemes provide an equivalent estimated monthly pension based on your inputs.")
 
 if __name__ == '__main__':
     main()
