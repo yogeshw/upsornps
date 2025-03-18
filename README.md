@@ -2,7 +2,7 @@
 
 Copyright © 2025 Yogesh Wadadekar
 
-A Python-based calculator to compare pension benefits between Universal Pension Scheme (UPS) and National Pension System (NPS).
+A calculator to compare pension benefits between Universal Pension Scheme (UPS) and National Pension System (NPS). Available as both a web-based interface and Python command-line tool.
 
 ## Features
 
@@ -17,7 +17,13 @@ A Python-based calculator to compare pension benefits between Universal Pension 
 
 ## Usage
 
-Run the script and follow the interactive prompts:
+### Browser Interface (Recommended)
+1. Open `index.html` in a web browser
+2. Enter your values or use the defaults
+3. Click "Calculate Results" to see the analysis
+
+### Command Line Interface
+Run the Python script and follow the interactive prompts:
 
 ```bash
 python upsnpscalculator.py

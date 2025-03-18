@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPS/NPS Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: inline-block;
+            width: 400px;
+            margin-right: 10px;
+        }
+        input {
+            width: 150px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #34495e;
+        }
+        #results {
+            margin-top: 30px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .section-header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 10px;
+            margin: 20px 0 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Pension Scheme Comparison: UPS vs NPS</h1>
+        
+        <div class="section-header">Basic Information</div>
+        <div class="input-group">
+            <label for="currentAge">Current Age:</label>
+            <input type="number" id="currentAge" value="53">
+        </div>
+        <div class="input-group">
+            <label for="retirementAge">Expected Retirement Age:</label>
+            <input type="number" id="retirementAge" value="60">
+        </div>
+        <div class="input-group">
+            <label for="currentSalary">Current (Basic + DA) Annual Amount in Lakhs:</label>
+            <input type="number" id="currentSalary" value="36.00" step="0.01">
+        </div>
+        <div class="input-group">
+            <label for="growthRate">Expected Annual Salary Growth Rate (e.g., 0.07 for 7%):</label>
+            <input type="number" id="growthRate" value="0.07" step="0.01">
+        </div>
+        <div class="input-group">
+            <label for="existingCorpus">Current NPS Corpus Amount in Lakhs:</label>
+            <input type="number" id="existingCorpus" value="120.00" step="0.01">
+        </div>
+
+        <div class="section-header">NPS Contribution Rates</div>
+        <div class="input-group">
+            <label for="employeeRate">Your Contribution Rate (e.g., 0.10 for 10%):</label>
+            <input type="number" id="employeeRate" value="0.10" step="0.01">
+        </div>
+        <div class="input-group">
+            <label for="employerRate">Employer's Contribution Rate (e.g., 0.14 for 14%):</label>
+            <input type="number" id="employerRate" value="0.14" step="0.01">
+        </div>
+
+        <div class="section-header">Return Rates</div>
+        <div class="input-group">
+            <label for="annualReturn">Expected Annual Return on NPS Contributions (e.g., 0.08 for 8%):</label>
+            <input type="number" id="annualReturn" value="0.08" step="0.01">
+        </div>
+        <div class="input-group">
+            <label for="annuityRate">Annuity Conversion Rate at Retirement (e.g., 0.05 for 5%):</label>
+            <input type="number" id="annuityRate" value="0.05" step="0.01">
+        </div>
+        <div class="input-group">
+            <label for="postRetGrowth">Expected Post-retirement UPS Pension Growth Rate (e.g., 0.05 for 5%):</label>
+            <input type="number" id="postRetGrowth" value="0.05" step="0.01">
+        </div>
+        <div class="input-group">
+            <label for="corpusReturn">Expected Return on Remaining NPS Corpus Post-retirement (e.g., 0.08 for 8%):</label>
+            <input type="number" id="corpusReturn" value="0.08" step="0.01">
+        </div>
+
+        <div class="section-header">Life Expectancy</div>
+        <div class="input-group">
+            <label for="employeeLife">Expected Years of Life After Retirement:</label>
+            <input type="number" id="employeeLife" value="20">
+        </div>
+        <div class="input-group">
+            <label for="spouseAdditional">Additional Years Spouse May Live After Employee's Death:</label>
+            <input type="number" id="spouseAdditional" value="10">
+        </div>
+
+        <button onclick="calculateResults()">Calculate Results</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script src="upsnpscalculator.js"></script>
+    <script>
+        function calculateResults() {
+            // Get values from form
+            const inputs = {
+                currentAge: parseInt(document.getElementById('currentAge').value),
+                retirementAge: parseInt(document.getElementById('retirementAge').value),
+                currentSalary: parseFloat(document.getElementById('currentSalary').value) * 100000,
+                growthRate: parseFloat(document.getElementById('growthRate').value),
+                existingCorpus: parseFloat(document.getElementById('existingCorpus').value) * 100000,
+                employeeRate: parseFloat(document.getElementById('employeeRate').value),
+                employerRate: parseFloat(document.getElementById('employerRate').value),
+                annualReturn: parseFloat(document.getElementById('annualReturn').value),
+                annuityRate: parseFloat(document.getElementById('annuityRate').value),
+                postRetGrowth: parseFloat(document.getElementById('postRetGrowth').value),
+                corpusReturn: parseFloat(document.getElementById('corpusReturn').value),
+                employeeLife: parseInt(document.getElementById('employeeLife').value),
+                spouseAdditional: parseInt(document.getElementById('spouseAdditional').value)
+            };
+
+            // Redirect console.log to results div
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.textContent = ''; // Clear previous results
+            
+            const originalLog = console.log;
+            console.log = function() {
+                const args = Array.from(arguments);
+                resultsDiv.textContent += args.join(' ') + '\n';
+            };
+
+            // Run the calculator
+            try {
+                // Override prompt function to use our form values
+                window.prompt = function(question, defaultValue) {
+                    if (question.includes("current age")) return inputs.currentAge;
+                    if (question.includes("retirement age")) return inputs.retirementAge;
+                    if (question.includes("current (Basic + DA)")) return inputs.currentSalary/100000;
+                    if (question.includes("salary growth rate")) return inputs.growthRate;
+                    if (question.includes("current NPS corpus")) return inputs.existingCorpus/100000;
+                    if (question.includes("your contribution rate")) return inputs.employeeRate;
+                    if (question.includes("employer's contribution rate")) return inputs.employerRate;
+                    if (question.includes("annual return on NPS")) return inputs.annualReturn;
+                    if (question.includes("annuity conversion rate")) return inputs.annuityRate;
+                    if (question.includes("post-retirement UPS")) return inputs.postRetGrowth;
+                    if (question.includes("remaining NPS corpus")) return inputs.corpusReturn;
+                    if (question.includes("expected years of life")) return inputs.employeeLife;
+                    if (question.includes("additional years spouse")) return inputs.spouseAdditional;
+                    return defaultValue;
+                };
+                
+                window.runCalculator();
+            } catch (error) {
+                console.log("Error:", error.message);
+            }
+
+            // Restore original console.log
+            console.log = originalLog;
+        }
+    </script>
+</body>
+</html>

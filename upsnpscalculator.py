@@ -215,8 +215,10 @@ def main():
     print("\nLife Expectancy Analysis:")
     print(f"  Employee expected to live for {employee_life_years} years after retirement")
     print(f"  Spouse expected to live for additional {spouse_additional_years} years")
-    total_coverage_needed = employee_life_years + spouse_additional_years
+    total_coverage_needed = max(employee_life_years, employee_life_years + spouse_additional_years)
     print(f"  Total years of pension coverage needed: {total_coverage_needed}")
+    if spouse_additional_years < 0:
+        print("  Note: Since spouse's additional years is negative, coverage is needed only until employee's death")
     
     # Post-retirement analysis
     print("\nPost-Retirement Analysis:")
