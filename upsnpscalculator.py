@@ -28,6 +28,16 @@ def calculate_ups_monthly_pension(final_salary):
     annual_pension = 0.5 * final_salary
     return annual_pension / 12
 
+def format_amount(amount):
+    """
+    Format amount to show in lakhs if >= 1 lakh, otherwise in thousands
+    """
+    if amount >= 100000:
+        return f"{amount/100000:.2f}L"
+    elif amount >= 1000:
+        return f"{amount/1000:.2f}K"
+    return f"{amount:.2f}"
+
 def calculate_corpus_depletion_years(initial_corpus, ups_monthly_initial, nps_monthly, 
                                 employee_life_years, spouse_additional_years,
                                 post_ret_growth=0.05, corpus_return=0.08):
@@ -67,7 +77,9 @@ def calculate_corpus_depletion_years(initial_corpus, ups_monthly_initial, nps_mo
         yearly_difference = yearly_ups - yearly_nps
         interest_earned = corpus * corpus_return
         
-        print(f"{year:4d}  {current_ups:10,.2f}  {nps_monthly:10,.2f}  {yearly_difference:16,.2f}  {interest_earned:14,.2f}  {corpus:14,.2f}  {phase:>7}")
+        print(f"{year:4d}  {format_amount(current_ups):>10}  {format_amount(nps_monthly):>10}  "
+              f"{format_amount(yearly_difference):>16}  {format_amount(interest_earned):>14}  "
+              f"{format_amount(corpus):>14}  {phase:>7}")
         
         # If corpus generates more interest than needed for difference
         if year == 0 and corpus * corpus_return >= yearly_difference:
@@ -204,12 +216,12 @@ def main():
     
     # Output the results
     print("\nEstimated Results at Retirement:")
-    print(f"  Final basic salary: {final_salary:,.2f}")
-    print(f"  UPS estimated monthly pension (employee): {ups_monthly:,.2f}")
-    print(f"  UPS estimated monthly pension (spouse): {ups_monthly * 0.5:,.2f}")
-    print(f"  NPS accumulated corpus: {corpus:,.2f}")
-    print(f"  NPS estimated monthly pension (constant for both): {nps_monthly:,.2f}")
-    print(f"  NPS lump sum amount (60%): {lump_sum:,.2f}")
+    print(f"  Final basic salary: {format_amount(final_salary)}")
+    print(f"  UPS estimated monthly pension (employee): {format_amount(ups_monthly)}")
+    print(f"  UPS estimated monthly pension (spouse): {format_amount(ups_monthly * 0.5)}")
+    print(f"  NPS accumulated corpus: {format_amount(corpus)}")
+    print(f"  NPS estimated monthly pension (constant for both): {format_amount(nps_monthly)}")
+    print(f"  NPS lump sum amount (60%): {format_amount(lump_sum)}")
     
     # Life expectancy analysis
     print("\nLife Expectancy Analysis:")

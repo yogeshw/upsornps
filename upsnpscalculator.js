@@ -22,6 +22,20 @@ function calculateUPSMonthlyPension(finalSalary) {
     return annualPension / 12;
 }
 
+function formatAmount(amount) {
+    /**
+     * Format amount to show in lakhs if >= 1 lakh, otherwise in thousands
+     * @param {number} amount - Amount to format
+     * @returns {string} Formatted amount string
+     */
+    if (amount >= 100000) {
+        return `${(amount/100000).toFixed(2)}L`;
+    } else if (amount >= 1000) {
+        return `${(amount/1000).toFixed(2)}K`;
+    }
+    return amount.toFixed(2);
+}
+
 function calculateCorpusDepletionYears(initialCorpus, upsMonthlyInitial, npsMonthly, 
                                      employeeLifeYears, spouseAdditionalYears,
                                      postRetGrowth = 0.05, corpusReturn = 0.08) {
@@ -57,11 +71,11 @@ function calculateCorpusDepletionYears(initialCorpus, upsMonthlyInitial, npsMont
         
         console.log(
             `${year.toString().padStart(4)}  ` +
-            `${currentUps.toFixed(2).padStart(10)}  ` +
-            `${npsMonthly.toFixed(2).padStart(10)}  ` +
-            `${yearlyDifference.toFixed(2).padStart(16)}  ` +
-            `${interestEarned.toFixed(2).padStart(14)}  ` +
-            `${corpus.toFixed(2).padStart(14)}  ` +
+            `${formatAmount(currentUps).padStart(10)}  ` +
+            `${formatAmount(npsMonthly).padStart(10)}  ` +
+            `${formatAmount(yearlyDifference).padStart(16)}  ` +
+            `${formatAmount(interestEarned).padStart(14)}  ` +
+            `${formatAmount(corpus).padStart(14)}  ` +
             `${phase.padStart(7)}`
         );
         
@@ -164,12 +178,12 @@ function main() {
         
         // Output the results
         console.log("\nEstimated Results at Retirement:");
-        console.log(`  Final basic salary: ${finalSalary.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
-        console.log(`  UPS estimated monthly pension (employee): ${upsMonthly.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
-        console.log(`  UPS estimated monthly pension (spouse): ${(upsMonthly * 0.5).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
-        console.log(`  NPS accumulated corpus: ${corpus.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
-        console.log(`  NPS estimated monthly pension (constant for both): ${npsMonthly.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
-        console.log(`  NPS lump sum amount (60%): ${lumpSum.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`);
+        console.log(`  Final basic salary: ${formatAmount(finalSalary)}`);
+        console.log(`  UPS estimated monthly pension (employee): ${formatAmount(upsMonthly)}`);
+        console.log(`  UPS estimated monthly pension (spouse): ${formatAmount(upsMonthly * 0.5)}`);
+        console.log(`  NPS accumulated corpus: ${formatAmount(corpus)}`);
+        console.log(`  NPS estimated monthly pension (constant for both): ${formatAmount(npsMonthly)}`);
+        console.log(`  NPS lump sum amount (60%): ${formatAmount(lumpSum)}`);
         
         // Life expectancy analysis
         console.log("\nLife Expectancy Analysis:");
