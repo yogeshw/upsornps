@@ -1,6 +1,12 @@
 // Copyright (C) 2025 Yogesh Wadadekar
 // This program is licensed under GPL v3. See LICENSE file for details.
 
+// --- Constants ---
+const UPS_PENSION_FACTOR = 0.5;
+const NPS_ANNUITY_PORTION = 0.4;
+const NPS_LUMP_SUM_PORTION = 0.6;
+const MONTHS_PER_YEAR = 12;
+
 function calculateFinalSalary(currentSalary, growthRate, years) {
     /**
      * Calculate the final basic salary at retirement based on compound growth.
@@ -18,8 +24,8 @@ function calculateUPSMonthlyPension(finalSalary) {
      * @param {number} finalSalary - Final basic salary
      * @returns {number} Monthly pension (assuming 50% of final salary as annual pension)
      */
-    const annualPension = 0.5 * finalSalary;
-    return annualPension / 12;
+    const annualPension = UPS_PENSION_FACTOR * finalSalary; // Use constant
+    return annualPension / MONTHS_PER_YEAR; // Use constant
 }
 
 function formatAmount(amount) {
@@ -40,20 +46,21 @@ function calculateCorpusDepletionYears(initialCorpus, upsMonthlyInitial, npsMont
                                      employeeLifeYears, spouseAdditionalYears,
                                      postRetGrowth = 0.05, corpusReturn = 0.08) {
     /**
-     * Calculate how many years the 60% NPS corpus will last
-     * @param {number} initialCorpus - 60% of NPS corpus available as lump sum
-     * @param {number} upsMonthlyInitial - Initial monthly UPS pension
-     * @param {number} npsMonthly - Monthly NPS annuity (remains constant)
-     * @param {number} employeeLifeYears - Expected years employee will live after retirement
-     * @param {number} spouseAdditionalYears - Additional years spouse will live after employee's death
-     * @param {number} postRetGrowth - Annual growth rate of UPS pension
-     * @param {number} corpusReturn - Annual return on remaining corpus
-     * @returns {number} Number of years the corpus lasts
+     * Calculate how many years the NPS lump sum corpus will last while covering pension differences.
+     * @param {number} initialCorpus - NPS lump sum corpus available.
+     * @param {number} upsMonthlyInitial - Initial monthly UPS pension.
+     * @param {number} npsMonthly - Monthly NPS annuity (remains constant).
+     * @param {number} employeeLifeYears - Expected years employee will live after retirement.
+     * @param {number} spouseAdditionalYears - Additional years spouse will live after employee's death.
+     * @param {number} postRetGrowth - Annual growth rate of UPS pension.
+     * @param {number} corpusReturn - Annual return on remaining corpus.
+     * @returns {number} Number of years the corpus lasts, or Infinity if it never depletes.
      */
     let corpus = initialCorpus;
     let year = 0;
     let upsMonthly = upsMonthlyInitial;
     const totalYears = employeeLifeYears + spouseAdditionalYears;
+    const yearlyNps = npsMonthly * MONTHS_PER_YEAR; // Calculate constant NPS yearly amount once
     
     console.log("\nYear-by-year NPS Corpus Analysis:");
     console.log("Year  UPS Monthly  NPS Monthly  Yearly Difference  Interest Earned    Corpus Balance  Phase");
@@ -61,11 +68,10 @@ function calculateCorpusDepletionYears(initialCorpus, upsMonthlyInitial, npsMont
     
     while (corpus > 0 && year < totalYears) {
         const isSpousePhase = year >= employeeLifeYears;
-        const currentUps = upsMonthly * (isSpousePhase ? 0.5 : 1.0);
+        const currentUps = upsMonthly * (isSpousePhase ? UPS_PENSION_FACTOR : 1.0); // Use constant
         const phase = isSpousePhase ? "Spouse" : "Employee";
         
-        const yearlyUps = currentUps * 12;
-        const yearlyNps = npsMonthly * 12;
+        const yearlyUps = currentUps * MONTHS_PER_YEAR; // Use constant
         const yearlyDifference = yearlyUps - yearlyNps;
         const interestEarned = corpus * corpusReturn;
         
@@ -79,7 +85,7 @@ function calculateCorpusDepletionYears(initialCorpus, upsMonthlyInitial, npsMont
             `${phase.padStart(7)}`
         );
         
-        if (year === 0 && corpus * corpusReturn >= yearlyDifference) {
+        if (year === 0 && interestEarned >= yearlyDifference) { // Simplified check
             console.log("\nThe corpus will never deplete as the investment returns cover the pension difference perpetually!");
             return Infinity;
         }
@@ -120,13 +126,14 @@ function calculateNPSCorpus(currentSalary, growthRate, years, totalContribRate, 
 
 function calculateNPSMonthlyPension(corpus, annuityRate) {
     /**
-     * Calculate the estimated monthly pension from NPS
+     * Calculate the estimated monthly pension from NPS.
+     * Uses a portion of the corpus to purchase an annuity based on NPS_ANNUITY_PORTION.
      * @param {number} corpus - The total corpus accumulated
-     * @param {number} annuityRate - The annuity conversion rate
+     * @param {number} annuityRate - The annuity conversion rate (annual)
      * @returns {number} Estimated monthly pension
      */
-    const annualAnnuityPension = 0.4 * corpus * annuityRate;
-    return annualAnnuityPension / 12;
+    const annualAnnuityPension = NPS_ANNUITY_PORTION * corpus * annuityRate; // Use constant
+    return annualAnnuityPension / MONTHS_PER_YEAR; // Use constant
 }
 
 function promptWithDefault(question, defaultValue) {
@@ -170,8 +177,8 @@ function main() {
                                         totalContribRate, annualReturn, existingCorpus);
         const npsMonthly = calculateNPSMonthlyPension(corpus, annuityRate);
         
-        // Calculate how long the 60% corpus will last
-        const lumpSum = corpus * 0.6; // 60% of corpus available as lump sum
+        // Calculate how long the lump sum corpus will last
+        const lumpSum = corpus * NPS_LUMP_SUM_PORTION; // Use constant
         const depletionYears = calculateCorpusDepletionYears(lumpSum, upsMonthly, npsMonthly,
                                                           employeeLifeYears, spouseAdditionalYears,
                                                           postRetGrowth, corpusReturn);
@@ -180,17 +187,20 @@ function main() {
         console.log("\nEstimated Results at Retirement:");
         console.log(`  Final basic salary: ${formatAmount(finalSalary)}`);
         console.log(`  UPS estimated monthly pension (employee): ${formatAmount(upsMonthly)}`);
-        console.log(`  UPS estimated monthly pension (spouse): ${formatAmount(upsMonthly * 0.5)}`);
+        console.log(`  UPS estimated monthly pension (spouse): ${formatAmount(upsMonthly * UPS_PENSION_FACTOR)}`); // Use constant
         console.log(`  NPS accumulated corpus: ${formatAmount(corpus)}`);
         console.log(`  NPS estimated monthly pension (constant for both): ${formatAmount(npsMonthly)}`);
-        console.log(`  NPS lump sum amount (60%): ${formatAmount(lumpSum)}`);
+        console.log(`  NPS lump sum amount (${NPS_LUMP_SUM_PORTION * 100}%): ${formatAmount(lumpSum)}`); // Use constant
         
         // Life expectancy analysis
         console.log("\nLife Expectancy Analysis:");
         console.log(`  Employee expected to live for ${employeeLifeYears} years after retirement`);
         console.log(`  Spouse expected to live for additional ${spouseAdditionalYears} years`);
-        const totalCoverageNeeded = employeeLifeYears + spouseAdditionalYears;
+        const totalCoverageNeeded = Math.max(employeeLifeYears, employeeLifeYears + spouseAdditionalYears); // Corrected logic
         console.log(`  Total years of pension coverage needed: ${totalCoverageNeeded}`);
+        if (spouseAdditionalYears < 0) {
+            console.log("  Note: Since spouse's additional years is negative, coverage is needed only until employee's death");
+        }
         
         // Post-retirement analysis
         console.log("\nPost-Retirement Analysis:");

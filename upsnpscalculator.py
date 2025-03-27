@@ -1,7 +1,15 @@
 # Copyright (C) 2025 Yogesh Wadadekar
 # This program is licensed under GPL v3. See LICENSE file for details.
 
-def calculate_final_salary(current_salary, growth_rate, years):
+from typing import Union
+
+# --- Constants ---
+UPS_PENSION_FACTOR: float = 0.5
+NPS_ANNUITY_PORTION: float = 0.4
+NPS_LUMP_SUM_PORTION: float = 0.6
+MONTHS_PER_YEAR: int = 12
+
+def calculate_final_salary(current_salary: float, growth_rate: float, years: int) -> float:
     """
     Calculate the final basic salary at retirement based on compound growth.
     
@@ -15,7 +23,7 @@ def calculate_final_salary(current_salary, growth_rate, years):
     """
     return current_salary * ((1 + growth_rate) ** years)
 
-def calculate_ups_monthly_pension(final_salary):
+def calculate_ups_monthly_pension(final_salary: float) -> float:
     """
     Calculate the monthly pension under UPS.
     
@@ -25,10 +33,10 @@ def calculate_ups_monthly_pension(final_salary):
     Returns:
       float: Monthly pension (assuming 50% of final salary as annual pension).
     """
-    annual_pension = 0.5 * final_salary
-    return annual_pension / 12
+    annual_pension: float = UPS_PENSION_FACTOR * final_salary
+    return annual_pension / MONTHS_PER_YEAR
 
-def format_amount(amount):
+def format_amount(amount: float) -> str:
     """
     Format amount to show in lakhs if >= 1 lakh, otherwise in thousands
     """
@@ -38,58 +46,52 @@ def format_amount(amount):
         return f"{amount/1000:.2f}K"
     return f"{amount:.2f}"
 
-def calculate_corpus_depletion_years(initial_corpus, ups_monthly_initial, nps_monthly, 
-                                employee_life_years, spouse_additional_years,
-                                post_ret_growth=0.05, corpus_return=0.08):
+def calculate_corpus_depletion_years(initial_corpus: float, ups_monthly_initial: float, nps_monthly: float, 
+                                employee_life_years: int, spouse_additional_years: int,
+                                post_ret_growth: float = 0.05, corpus_return: float = 0.08) -> Union[int, float]:
     """
-    Calculate how many years the 60% NPS corpus will last while covering pension differences
-    for both employee and spouse periods.
+    Calculate how many years the NPS lump sum corpus will last while covering pension differences.
     
     Parameters:
-        initial_corpus (float): 60% of NPS corpus available as lump sum
-        ups_monthly_initial (float): Initial monthly UPS pension
-        nps_monthly (float): Monthly NPS annuity (remains constant)
-        employee_life_years (int): Expected years employee will live after retirement
-        spouse_additional_years (int): Additional years spouse will live after employee's death
-        post_ret_growth (float): Annual growth rate of UPS pension
-        corpus_return (float): Annual return on remaining corpus
+        initial_corpus (float): NPS lump sum corpus available.
+        ups_monthly_initial (float): Initial monthly UPS pension.
+        nps_monthly (float): Monthly NPS annuity (remains constant).
+        employee_life_years (int): Expected years employee will live after retirement.
+        spouse_additional_years (int): Additional years spouse will live after employee's death.
+        post_ret_growth (float): Annual growth rate of UPS pension.
+        corpus_return (float): Annual return on remaining corpus.
     
     Returns:
-        int: Number of years the corpus lasts
+        Union[int, float]: Number of years the corpus lasts, or float('inf') if it never depletes.
     """
-    corpus = initial_corpus
-    year = 0
-    ups_monthly = ups_monthly_initial
-    total_years = employee_life_years + spouse_additional_years
+    corpus: float = initial_corpus
+    year: int = 0
+    ups_monthly: float = ups_monthly_initial
+    total_years: int = employee_life_years + spouse_additional_years
+    yearly_nps: float = nps_monthly * MONTHS_PER_YEAR # Calculate constant NPS yearly amount once
     
     print("\nYear-by-year NPS Corpus Analysis:")
     print("Year  UPS Monthly  NPS Monthly  Yearly Difference  Interest Earned    Corpus Balance  Phase")
     print("-" * 95)
     
     while corpus > 0 and year < total_years:
-        # Determine if we're in employee or spouse phase
-        is_spouse_phase = year >= employee_life_years
-        current_ups = ups_monthly * (0.5 if is_spouse_phase else 1.0)
-        phase = "Spouse" if is_spouse_phase else "Employee"
+        is_spouse_phase: bool = year >= employee_life_years
+        current_ups: float = ups_monthly * (UPS_PENSION_FACTOR if is_spouse_phase else 1.0) # Use constant
+        phase: str = "Spouse" if is_spouse_phase else "Employee"
         
-        yearly_ups = current_ups * 12
-        yearly_nps = nps_monthly * 12
-        yearly_difference = yearly_ups - yearly_nps
-        interest_earned = corpus * corpus_return
+        yearly_ups: float = current_ups * MONTHS_PER_YEAR
+        yearly_difference: float = yearly_ups - yearly_nps
+        interest_earned: float = corpus * corpus_return
         
         print(f"{year:4d}  {format_amount(current_ups):>10}  {format_amount(nps_monthly):>10}  "
               f"{format_amount(yearly_difference):>16}  {format_amount(interest_earned):>14}  "
               f"{format_amount(corpus):>14}  {phase:>7}")
         
-        # If corpus generates more interest than needed for difference
-        if year == 0 and corpus * corpus_return >= yearly_difference:
+        if year == 0 and interest_earned >= yearly_difference: # Simplified check
             print("\nThe corpus will never deplete as the investment returns cover the pension difference perpetually!")
             return float('inf')
         
-        # Reduce corpus by difference needed, but add interest earned
         corpus = (corpus * (1 + corpus_return)) - yearly_difference
-        
-        # Increase UPS pension for next year (affects both employee and spouse phases)
         ups_monthly *= (1 + post_ret_growth)
         year += 1
     
@@ -98,7 +100,9 @@ def calculate_corpus_depletion_years(initial_corpus, ups_monthly_initial, nps_mo
     
     return year
 
-def calculate_nps_corpus(current_salary, growth_rate, years, total_contrib_rate, annual_return, existing_corpus=0.0):
+def calculate_nps_corpus(current_salary: float, growth_rate: float, years: int, 
+                         total_contrib_rate: float, annual_return: float, 
+                         existing_corpus: float = 0.0) -> float:
     """
     Calculate the NPS corpus accumulated over the years.
     
@@ -108,39 +112,37 @@ def calculate_nps_corpus(current_salary, growth_rate, years, total_contrib_rate,
       current_salary (float): Current basic salary.
       growth_rate (float): Annual salary growth rate.
       years (int): Number of years of contributions.
-      total_contrib_rate (float): Total contribution rate (employee + employer, e.g., 0.20 for 20%).
-      annual_return (float): Expected annual return on contributions (e.g., 0.08 for 8%).
-      existing_corpus (float): Already accumulated NPS corpus, if any.
+      total_contrib_rate (float): Total contribution rate (employee + employer).
+      annual_return (float): Expected annual return on contributions.
+      existing_corpus (float): Already accumulated NPS corpus.
     
     Returns:
       float: Total corpus accumulated at retirement.
     """
-    # Start with existing corpus and let it compound for all years
-    corpus = existing_corpus * ((1 + annual_return) ** years)
+    corpus: float = existing_corpus * ((1 + annual_return) ** years)
     
-    # Add new contributions that compound for remaining years
     for i in range(1, years + 1):
-        salary_at_year = current_salary * ((1 + growth_rate) ** i)
-        annual_contribution = total_contrib_rate * salary_at_year
-        years_to_compound = years - i
+        salary_at_year: float = current_salary * ((1 + growth_rate) ** i)
+        annual_contribution: float = total_contrib_rate * salary_at_year
+        years_to_compound: int = years - i
         corpus += annual_contribution * ((1 + annual_return) ** years_to_compound)
     return corpus
 
-def calculate_nps_monthly_pension(corpus, annuity_rate):
+def calculate_nps_monthly_pension(corpus: float, annuity_rate: float) -> float:
     """
     Calculate the estimated monthly pension from NPS.
     
-    Only 40% of the corpus is used to purchase an annuity.
+    Uses a portion of the corpus to purchase an annuity based on NPS_ANNUITY_PORTION.
     
     Parameters:
       corpus (float): The total corpus accumulated.
-      annuity_rate (float): The annuity conversion rate (annual, e.g., 0.06 for 6%).
+      annuity_rate (float): The annuity conversion rate (annual).
     
     Returns:
       float: Estimated monthly pension.
     """
-    annual_annuity_pension = 0.4 * corpus * annuity_rate
-    return annual_annuity_pension / 12
+    annual_annuity_pension: float = NPS_ANNUITY_PORTION * corpus * annuity_rate
+    return annual_annuity_pension / MONTHS_PER_YEAR
 
 def main():
     print("Pension Scheme Comparison: UPS vs NPS")
@@ -209,7 +211,7 @@ def main():
     nps_monthly = calculate_nps_monthly_pension(corpus, annuity_rate)
     
     # Calculate how long the 60% corpus will last
-    lump_sum = corpus * 0.6  # 60% of corpus available as lump sum
+    lump_sum = corpus * NPS_LUMP_SUM_PORTION  # Use constant
     depletion_years = calculate_corpus_depletion_years(lump_sum, ups_monthly, nps_monthly,
                                                       employee_life_years, spouse_additional_years,
                                                       post_ret_growth, corpus_return)
