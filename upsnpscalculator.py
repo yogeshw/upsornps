@@ -23,17 +23,19 @@ def calculate_final_salary(current_salary: float, growth_rate: float, years: int
     """
     return current_salary * ((1 + growth_rate) ** years)
 
-def calculate_ups_monthly_pension(final_salary: float) -> float:
+def calculate_ups_monthly_pension(final_salary: float, years_of_service: int) -> float:
     """
-    Calculate the monthly pension under UPS.
+    Calculate the monthly pension under UPS, proportionate to years of service.
     
     Parameters:
       final_salary (float): Final basic salary.
+      years_of_service (int): Number of years worked (max 25 for full pension).
     
     Returns:
-      float: Monthly pension (assuming 50% of final salary as annual pension).
+      float: Monthly pension.
     """
-    annual_pension: float = UPS_PENSION_FACTOR * final_salary
+    employee_factor: float = min(years_of_service / 25, 1.0) * UPS_PENSION_FACTOR
+    annual_pension: float = employee_factor * final_salary
     return annual_pension / MONTHS_PER_YEAR
 
 def format_amount(amount: float) -> str:
@@ -192,6 +194,14 @@ def main():
         spouse_additional_input = input("Enter additional years spouse may live after employee's death [10]: ")
         spouse_additional_years = 10 if spouse_additional_input == "" else int(spouse_additional_input)
         
+        # Ask age when the user joined government service and compute service years
+        join_age_input = input("Enter your age when you joined Government service [28]: ")
+        join_age = 28 if join_age_input == "" else int(join_age_input)
+        years_of_service = retirement_age - join_age
+        if years_of_service < 0:
+            print("Join age must be less than or equal to retirement age.")
+            return
+        
     except ValueError:
         print("Invalid input. Please enter numeric values.")
         return
@@ -203,7 +213,7 @@ def main():
     
     # Calculate UPS pension
     final_salary = calculate_final_salary(current_salary, growth_rate, years_to_retirement)
-    ups_monthly = calculate_ups_monthly_pension(final_salary)
+    ups_monthly = calculate_ups_monthly_pension(final_salary, years_of_service)
     
     # Calculate NPS corpus and pension
     corpus = calculate_nps_corpus(current_salary, growth_rate, years_to_retirement, 

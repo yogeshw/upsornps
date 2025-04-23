@@ -18,14 +18,16 @@ function calculateFinalSalary(currentSalary, growthRate, years) {
     return currentSalary * Math.pow(1 + growthRate, years);
 }
 
-function calculateUPSMonthlyPension(finalSalary) {
+function calculateUPSMonthlyPension(finalSalary, yearsOfService) {
     /**
-     * Calculate the monthly pension under UPS.
+     * Calculate the monthly pension under UPS, proportionate to years of service.
      * @param {number} finalSalary - Final basic salary
-     * @returns {number} Monthly pension (assuming 50% of final salary as annual pension)
+     * @param {number} yearsOfService - Number of years worked (max 25 for full pension)
+     * @returns {number} Monthly pension
      */
-    const annualPension = UPS_PENSION_FACTOR * finalSalary; // Use constant
-    return annualPension / MONTHS_PER_YEAR; // Use constant
+    const serviceFactor = Math.min(yearsOfService / 25, 1.0);
+    const annualPension = serviceFactor * UPS_PENSION_FACTOR * finalSalary;
+    return annualPension / MONTHS_PER_YEAR;
 }
 
 function formatAmount(amount) {
@@ -162,6 +164,14 @@ function main() {
         const employeeLifeYears = parseInt(promptWithDefault("Enter expected years of life after retirement [20]: ", "20"));
         const spouseAdditionalYears = parseInt(promptWithDefault("Enter additional years spouse may live after employee's death [10]: ", "10"));
         
+        // Ask the age when user joined government service and compute years of service
+        const joinAge = parseInt(promptWithDefault("At what age did you join Government service [28]: ", "28"));
+        const yearsOfService = retirementAge - joinAge;
+        if (yearsOfService < 0) {
+            console.log("Join age must be less than or equal to retirement age.");
+            return;
+        }
+
         const yearsToRetirement = retirementAge - currentAge;
         if (yearsToRetirement <= 0) {
             console.log("Retirement age must be greater than current age.");
@@ -170,7 +180,7 @@ function main() {
         
         // Calculate UPS pension
         const finalSalary = calculateFinalSalary(currentSalary, growthRate, yearsToRetirement);
-        const upsMonthly = calculateUPSMonthlyPension(finalSalary);
+        const upsMonthly = calculateUPSMonthlyPension(finalSalary, yearsOfService);
         
         // Calculate NPS corpus and pension
         const corpus = calculateNPSCorpus(currentSalary, growthRate, yearsToRetirement, 
