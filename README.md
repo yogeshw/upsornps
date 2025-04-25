@@ -31,17 +31,18 @@ python upsnpscalculator.py
 
 ### Input Parameters
 
-- Current age and retirement age
-- Current basic salary (Basic + DA)
-- Expected salary growth rate
-- Existing NPS corpus (if any)
-- NPS contribution rates (employee and employer)
-- Expected returns on NPS investments
-- Annuity conversion rate
-- Post-retirement parameters
-  - UPS pension growth rate
-  - NPS corpus return rate
-  - Life expectancy estimates
+ - Current age and retirement age
+ - Current basic salary (Basic + DA)
+ - Expected salary growth rate
+ - Existing NPS corpus (if any)
+ - NPS contribution rates (employee and employer)
+ - Expected returns on NPS investments
+ - Annuity conversion rate without return of purchase price
+ - Age when you joined Government service
+ - Post-retirement parameters
+   - UPS pension growth rate
+   - NPS corpus return rate
+   - Life expectancy estimates
 
 ### Output Information
 
@@ -53,15 +54,15 @@ python upsnpscalculator.py
 
 ## Default Values
 
-The calculator comes with sensible defaults:
-- Current age: 53 years
-- Retirement age: 60 years
-- Current annual salary: ₹36 lakhs
-- Salary growth rate: 7%
-- NPS contribution: Employee (10%) + Employer (14%)
-- Investment return: 8%
-- Annuity rate: 5%
+ The calculator comes with sensible defaults:
+ - Current age: 53 years
+ - Retirement age: 60 years
+ - Current annual salary: ₹36 lakhs
+ - Salary growth rate: 7%
+ - NPS contribution: Employee (10%) + Employer (14%)
+ - Annuity rate (without return of purchase price): 7%
+ - Join age: 28 years
 
-## License
+ ## License
 
 GPL 3 License
