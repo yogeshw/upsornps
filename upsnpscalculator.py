@@ -133,13 +133,13 @@ def calculate_nps_corpus(current_salary: float, growth_rate: float, years: int,
 def calculate_nps_monthly_pension(corpus: float, annuity_rate: float) -> float:
     """
     Calculate the estimated monthly pension from NPS.
-    
+
     Uses a portion of the corpus to purchase an annuity based on NPS_ANNUITY_PORTION.
-    
+
     Parameters:
       corpus (float): The total corpus accumulated.
-      annuity_rate (float): The annuity conversion rate (annual).
-    
+      annuity_rate (float): The annuity conversion rate (annual) without return of purchase price.
+
     Returns:
       float: Estimated monthly pension.
     """
@@ -179,8 +179,8 @@ def main():
         annual_return_input = input("Enter expected annual return on NPS contributions [0.08 for 8%]: ")
         annual_return = 0.08 if annual_return_input == "" else float(annual_return_input)
         
-        annuity_rate_input = input("Enter the annuity conversion rate at retirement [0.05 for 5%]: ")
-        annuity_rate = 0.05 if annuity_rate_input == "" else float(annuity_rate_input)
+        annuity_rate_input = input("Enter the annuity conversion rate at retirement without return of purchase price [0.07 for 7%]: ")
+        annuity_rate = 0.07 if annuity_rate_input == "" else float(annuity_rate_input)
         
         post_ret_growth_input = input("Enter expected post-retirement UPS pension growth rate [0.05 for 5%]: ")
         post_ret_growth = 0.05 if post_ret_growth_input == "" else float(post_ret_growth_input)
@@ -255,6 +255,12 @@ def main():
             shortfall_years = total_coverage_needed - depletion_years
             print(f"  WARNING: This is {shortfall_years:.1f} years short of the total needed coverage period!")
         print("  while covering the difference between UPS and NPS pensions")
+        # Calculate minimum return rate on 60% corpus to last perpetually
+        yearly_ups = ups_monthly * MONTHS_PER_YEAR
+        yearly_nps = nps_monthly * MONTHS_PER_YEAR
+        difference = yearly_ups - yearly_nps
+        min_return_rate = difference / lump_sum
+        print(f"  Minimum return rate on the 60% corpus to last perpetually: {min_return_rate:.2%}")
 
 if __name__ == '__main__':
     main()

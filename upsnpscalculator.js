@@ -131,7 +131,7 @@ function calculateNPSMonthlyPension(corpus, annuityRate) {
      * Calculate the estimated monthly pension from NPS.
      * Uses a portion of the corpus to purchase an annuity based on NPS_ANNUITY_PORTION.
      * @param {number} corpus - The total corpus accumulated
-     * @param {number} annuityRate - The annuity conversion rate (annual)
+     * @param {number} annuityRate - The annual annuity conversion rate without return of purchase price
      * @returns {number} Estimated monthly pension
      */
     const annualAnnuityPension = NPS_ANNUITY_PORTION * corpus * annuityRate; // Use constant
@@ -158,7 +158,7 @@ function main() {
         const employerRate = parseFloat(promptWithDefault("  Enter employer's contribution rate [0.14 for 14%]: ", "0.14"));
         const totalContribRate = employeeRate + employerRate;
         const annualReturn = parseFloat(promptWithDefault("Enter expected annual return on NPS contributions [0.08 for 8%]: ", "0.08"));
-        const annuityRate = parseFloat(promptWithDefault("Enter the annuity conversion rate at retirement [0.05 for 5%]: ", "0.05"));
+        const annuityRate = parseFloat(promptWithDefault("Enter the annuity conversion rate at retirement without return of purchase price [0.07 for 7%]: ", "0.07"));
         const postRetGrowth = parseFloat(promptWithDefault("Enter expected post-retirement UPS pension growth rate [0.05 for 5%]: ", "0.05"));
         const corpusReturn = parseFloat(promptWithDefault("Enter expected return on remaining NPS corpus post-retirement [0.08 for 8%]: ", "0.08"));
         const employeeLifeYears = parseInt(promptWithDefault("Enter expected years of life after retirement [20]: ", "20"));
@@ -224,6 +224,12 @@ function main() {
                 console.log(`  WARNING: This is ${shortfallYears.toFixed(1)} years short of the total needed coverage period!`);
             }
             console.log("  while covering the difference between UPS and NPS pensions");
+            // Calculate minimum return rate on the 60% corpus to last perpetually
+            const yearlyUps = upsMonthly * MONTHS_PER_YEAR;
+            const yearlyNps = npsMonthly * MONTHS_PER_YEAR;
+            const difference = yearlyUps - yearlyNps;
+            const minReturnRate = difference / lumpSum;
+            console.log(`  Minimum return rate on the 60% corpus to last perpetually: ${(minReturnRate * 100).toFixed(2)}%`);
         }
     } catch (error) {
         console.error("Invalid input. Please enter numeric values.", error);
