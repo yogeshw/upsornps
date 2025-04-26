@@ -1,6 +1,9 @@
-Advanced features missing from the script
+Some features missing from the script
 
 * Start of Annuity can be deferred by a certain number of years
 * Withdrawal of 60% corpus can be deferred by a certain number of years
+* Partial withdrawals can be made after a certain period.
 
-One point which is deliberately not accounted for - on death of employee and spouse, annuity capital amount is returned to legal heirs. Since this amount will not be inflation corrected and will not benefit either the employee or their spouse, we have chosen not to account for that. 
+These features are not implemented in the script. They become relevant only when the NPS returns are higher than the returns if the money is invested oneself + return on annuity.
+
+
