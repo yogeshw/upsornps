@@ -4,6 +4,6 @@ Some features missing from the script
 * Withdrawal of 60% corpus can be deferred by a certain number of years
 * Partial withdrawals can be made after a certain period.
 
-These features are not implemented in the script. They become relevant only when the NPS returns are higher than the returns if the money is invested oneself + return on annuity.
+These features are not implemented in the script. They become relevant only when the NPS returns are higher than the returns if the money is invested oneself + return on annuity. This scenario seems unlikely.
 
 
