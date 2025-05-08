@@ -7,7 +7,9 @@ A calculator to compare pension benefits between Universal Pension Scheme (UPS) 
 ## Features
 
 - Calculates final salary based on current salary and growth rate
-- Estimates UPS monthly pension for employee and spouse
+- Estimates UPS monthly pension for employee and spouse (proportional to service years)
+- Calculates UPS lump sum amount at retirement.
+- Projects the future value of the UPS lump sum if invested.
 - Calculates NPS corpus accumulation with compound interest
 - Estimates NPS monthly pension and lump sum amount
 - Performs corpus depletion analysis
@@ -48,6 +50,7 @@ python upsnpscalculator.py
 
 - Final basic salary at retirement
 - Monthly pension estimates for both schemes
+- UPS lump sum amount and its projected invested value.
 - NPS corpus and lump sum calculations
 - Detailed corpus depletion analysis
 - Year-by-year breakdown of pension differences

@@ -45,6 +45,8 @@ The calculator will prompt for various inputs. You can press Enter to use the de
 \begin{itemize}
     \item Current Age [53]
     \item Retirement Age [60]
+    \item Age when you joined Government service [28] \\
+          Used to calculate total years of qualifying service.
     \item Current Annual (Basic + DA) in Lakhs [36.00] \\
           This is your current Basic Pay plus Dearness Allowance
     \item Annual Salary Growth Rate [7\%] \\
@@ -83,9 +85,11 @@ The calculator provides:
     \item Final basic salary at retirement
     \item Monthly pension under UPS scheme for:
     \begin{itemize}
-        \item Employee (50\% of final basic salary)
+        \item Employee (Proportional to service, up to 50\% of final basic salary if service is 25 years or more)
         \item Spouse (50\% of employee's pension after employee's death)
     \end{itemize}
+    \item UPS lump sum amount at retirement, calculated as 1/10th of the last drawn monthly basic pay (plus Dearness Allowance) for every completed six months of qualifying service.
+    \item Projected value of the UPS lump sum if invested at the same rate as the NPS 60\% lump sum.
     \item Total NPS corpus at retirement
     \item Monthly pension from NPS annuity (40\% of corpus)
     \item Lump sum amount available (60\% of corpus)
@@ -107,7 +111,7 @@ The calculator provides:
     \item Rates should be entered as decimals (e.g., 0.07 for 7\%)
     \item UPS pension calculation:
     \begin{itemize}
-        \item Employee receives 50\% of final basic salary
+        \item Employee receives a pension proportional to their years of service. If service is 25 years or more, pension is 50\% of final basic salary. Otherwise, it is (years of service / 25) * 50\% of final basic salary.
         \item Spouse receives 50\% of employee's pension after employee's death
         \item UPS pension grows at specified rate (default 5\%) for both phases
     \end{itemize}
