@@ -30,6 +30,22 @@ function calculateUPSMonthlyPension(finalSalary, yearsOfService) {
     return annualPension / MONTHS_PER_YEAR;
 }
 
+function calculateUPSLumpSum(finalSalaryAnnual, yearsOfService) {
+    /**
+     * Calculate the lump sum payment under UPS.
+     * The lump sum is 1/10th of the last drawn monthly basic pay (plus DA)
+     * for every completed six months of qualifying service.
+     * @param {number} finalSalaryAnnual - Final annual basic salary (plus DA).
+     * @param {number} yearsOfService - Number of completed years of qualifying service.
+     * @returns {number} Calculated UPS lump sum amount.
+     */
+    const lastMonthlySalary = finalSalaryAnnual / MONTHS_PER_YEAR;
+    // Number of completed six-month periods
+    const numSixMonthPeriods = yearsOfService * 2;
+    const lumpSum = (1/10) * lastMonthlySalary * numSixMonthPeriods;
+    return lumpSum;
+}
+
 function formatAmount(amount) {
     /**
      * Format amount to show in lakhs if >= 1 lakh, otherwise in thousands
@@ -178,10 +194,11 @@ function main() {
             return;
         }
         
-        // Calculate UPS pension
+        // Calculate UPS pension and lump sum
         const finalSalary = calculateFinalSalary(currentSalary, growthRate, yearsToRetirement);
         const upsMonthly = calculateUPSMonthlyPension(finalSalary, yearsOfService);
-        
+        const upsLumpSumAmount = calculateUPSLumpSum(finalSalary, yearsOfService);
+
         // Calculate NPS corpus and pension
         const corpus = calculateNPSCorpus(currentSalary, growthRate, yearsToRetirement, 
                                         totalContribRate, annualReturn, existingCorpus);
@@ -198,6 +215,7 @@ function main() {
         console.log(`  Final basic salary: ${formatAmount(finalSalary)}`);
         console.log(`  UPS estimated monthly pension (employee): ${formatAmount(upsMonthly)}`);
         console.log(`  UPS estimated monthly pension (spouse): ${formatAmount(upsMonthly * UPS_PENSION_FACTOR)}`); // Use constant
+        console.log(`  UPS lump sum amount: ${formatAmount(upsLumpSumAmount)}`);
         console.log(`  NPS accumulated corpus: ${formatAmount(corpus)}`);
         console.log(`  NPS estimated monthly pension (constant for both): ${formatAmount(npsMonthly)}`);
         console.log(`  NPS lump sum amount (${NPS_LUMP_SUM_PORTION * 100}%): ${formatAmount(lumpSum)}`); // Use constant

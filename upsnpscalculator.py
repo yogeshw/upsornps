@@ -38,6 +38,26 @@ def calculate_ups_monthly_pension(final_salary: float, years_of_service: int) ->
     annual_pension: float = employee_factor * final_salary
     return annual_pension / MONTHS_PER_YEAR
 
+def calculate_ups_lump_sum(final_salary_annual: float, years_of_service: int) -> float:
+    """
+    Calculate the lump sum payment under UPS.
+
+    The lump sum is 1/10th of the last drawn monthly basic pay (plus DA)
+    for every completed six months of qualifying service.
+
+    Parameters:
+      final_salary_annual (float): Final annual basic salary (plus DA).
+      years_of_service (int): Number of completed years of qualifying service.
+
+    Returns:
+      float: Calculated UPS lump sum amount.
+    """
+    last_monthly_salary: float = final_salary_annual / MONTHS_PER_YEAR
+    # Number of completed six-month periods
+    num_six_month_periods: int = years_of_service * 2
+    lump_sum: float = (1/10) * last_monthly_salary * num_six_month_periods
+    return lump_sum
+
 def format_amount(amount: float) -> str:
     """
     Format amount to show in lakhs if >= 1 lakh, otherwise in thousands
@@ -211,41 +231,51 @@ def main():
         print("Retirement age must be greater than current age.")
         return
     
-    # Calculate UPS pension
+    # Calculate UPS pension and lump sum
     final_salary = calculate_final_salary(current_salary, growth_rate, years_to_retirement)
     ups_monthly = calculate_ups_monthly_pension(final_salary, years_of_service)
-    
+    ups_lump_sum_amount = calculate_ups_lump_sum(final_salary, years_of_service)
+
     # Calculate NPS corpus and pension
     corpus = calculate_nps_corpus(current_salary, growth_rate, years_to_retirement, 
                                 total_contrib_rate, annual_return, existing_corpus)
     nps_monthly = calculate_nps_monthly_pension(corpus, annuity_rate)
     
-    # Calculate how long the 60% corpus will last
-    lump_sum = corpus * NPS_LUMP_SUM_PORTION  # Use constant
-    depletion_years = calculate_corpus_depletion_years(lump_sum, ups_monthly, nps_monthly,
-                                                      employee_life_years, spouse_additional_years,
-                                                      post_ret_growth, corpus_return)
+    # NPS lump sum (60% of corpus)
+    nps_lump_sum = corpus * NPS_LUMP_SUM_PORTION
+
+    # Calculate total pension coverage period needed
+    total_coverage_needed = max(employee_life_years, employee_life_years + spouse_additional_years)
     
     # Output the results
     print("\nEstimated Results at Retirement:")
     print(f"  Final basic salary: {format_amount(final_salary)}")
     print(f"  UPS estimated monthly pension (employee): {format_amount(ups_monthly)}")
     print(f"  UPS estimated monthly pension (spouse): {format_amount(ups_monthly * 0.5)}")
+    print(f"  UPS lump sum amount: {format_amount(ups_lump_sum_amount)}")
+    if ups_lump_sum_amount > 0 and total_coverage_needed > 0 and corpus_return > 0:
+        projected_ups_lump_sum = ups_lump_sum_amount * ((1 + corpus_return) ** total_coverage_needed)
+        print(f"    (Projected value after {total_coverage_needed} years if invested at {corpus_return:.2%}: {format_amount(projected_ups_lump_sum)})")
+    
     print(f"  NPS accumulated corpus: {format_amount(corpus)}")
     print(f"  NPS estimated monthly pension (constant for both): {format_amount(nps_monthly)}")
-    print(f"  NPS lump sum amount (60%): {format_amount(lump_sum)}")
+    print(f"  NPS lump sum amount (60%): {format_amount(nps_lump_sum)})")
     
-    # Life expectancy analysis
+    # Life expectancy analysis (display values used for total_coverage_needed)
     print("\nLife Expectancy Analysis:")
     print(f"  Employee expected to live for {employee_life_years} years after retirement")
     print(f"  Spouse expected to live for additional {spouse_additional_years} years")
-    total_coverage_needed = max(employee_life_years, employee_life_years + spouse_additional_years)
-    print(f"  Total years of pension coverage needed: {total_coverage_needed}")
+    print(f"  Total years of pension coverage needed: {total_coverage_needed}") # Displaying it
     if spouse_additional_years < 0:
         print("  Note: Since spouse's additional years is negative, coverage is needed only until employee's death")
     
-    # Post-retirement analysis
-    print("\nPost-Retirement Analysis:")
+    # Calculate how long the NPS 60% corpus will last
+    depletion_years = calculate_corpus_depletion_years(nps_lump_sum, ups_monthly, nps_monthly,
+                                                      employee_life_years, spouse_additional_years,
+                                                      post_ret_growth, corpus_return)
+    
+    # Post-retirement analysis for NPS lump sum
+    print("\nPost-Retirement Analysis (for NPS lump sum):")
     if depletion_years == float('inf'):
         print("  The NPS corpus will NEVER deplete as the investment returns")
         print("  cover the pension difference perpetually!")
@@ -259,8 +289,12 @@ def main():
         yearly_ups = ups_monthly * MONTHS_PER_YEAR
         yearly_nps = nps_monthly * MONTHS_PER_YEAR
         difference = yearly_ups - yearly_nps
-        min_return_rate = difference / lump_sum
-        print(f"  Minimum return rate on the 60% corpus to last perpetually: {min_return_rate:.2%}")
+        # Ensure nps_lump_sum is not zero to avoid division by zero error
+        if nps_lump_sum > 0:
+            min_return_rate = difference / nps_lump_sum
+            print(f"  Minimum return rate on the NPS 60% corpus to last perpetually: {min_return_rate:.2%}")
+        else:
+            print("  NPS lump sum is zero, cannot calculate minimum return rate for perpetuity.")
 
 if __name__ == '__main__':
     main()
