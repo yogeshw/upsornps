@@ -107,8 +107,8 @@
 
         <div class="section-header">Return Rates</div>
         <div class="input-group">
-            <label for="annualReturn">Expected Annual Return on NPS Contributions (e.g., 0.08 for 8%):</label>
-            <input type="number" id="annualReturn" value="0.08" step="0.01">
+            <label for="annualReturn">Expected Annual Return on NPS Contributions (e.g., 0.095 for 9.5%):</label>
+            <input type="number" id="annualReturn" value="0.095" step="0.01">
         </div>
         <div class="input-group">
             <label for="annuityRate">Annuity Conversion Rate at Retirement without return of purchase price (e.g., 0.07 for 7%):</label>
@@ -123,13 +123,14 @@
             <input type="number" id="corpusReturn" value="0.08" step="0.01">
         </div>
 
+
         <div class="section-header">Life Expectancy</div>
         <div class="input-group">
             <label for="employeeLife">Expected Years of Life After Retirement:</label>
             <input type="number" id="employeeLife" value="20">
         </div>
         <div class="input-group">
-            <label for="spouseAdditional">Additional Years Spouse May Live After Employee's Death:</label>
+            <label for="spouseAdditional">Additional Years Spouse May Live After Employee's Death (Spouse receives 60% of employee's pension):</label>
             <input type="number" id="spouseAdditional" value="10">
         </div>
         <!-- Service Details -->
@@ -140,7 +141,7 @@
         </div>
         
         <button onclick="calculateResults()">Calculate Results</button>
-        
+        <button onclick="resetToDefaults()" style="background-color:#888; margin-top:0;">Reset to Defaults</button>
         <div id="results"></div>
     </div>
 
@@ -160,8 +161,10 @@
                 annuityRate: parseFloat(document.getElementById('annuityRate').value),
                 postRetGrowth: parseFloat(document.getElementById('postRetGrowth').value),
                 corpusReturn: parseFloat(document.getElementById('corpusReturn').value),
+
                 employeeLife: parseInt(document.getElementById('employeeLife').value),
-                spouseAdditional: parseInt(document.getElementById('spouseAdditional').value)
+                spouseAdditional: parseInt(document.getElementById('spouseAdditional').value),
+                joinAge: parseInt(document.getElementById('joinAge').value)
             };
 
             // Redirect console.log to results div
@@ -189,11 +192,12 @@
                     if (question.includes("annuity conversion rate")) return inputs.annuityRate;
                     if (question.includes("post-retirement UPS")) return inputs.postRetGrowth;
                     if (question.includes("remaining NPS corpus")) return inputs.corpusReturn;
+
                     if (question.includes("expected years of life")) return inputs.employeeLife;
                     if (question.includes("additional years spouse")) return inputs.spouseAdditional;
+                    if (question.includes("join Government service")) return inputs.joinAge;
                     return defaultValue;
                 };
-                
                 window.runCalculator();
             } catch (error) {
                 console.log("Error:", error.message);
@@ -201,6 +205,25 @@
 
             // Restore original console.log
             console.log = originalLog;
+        }
+
+        function resetToDefaults() {
+            // Set all input fields to their default values
+            document.getElementById('currentAge').value = 53;
+            document.getElementById('retirementAge').value = 60;
+            document.getElementById('currentSalary').value = 36.00;
+            document.getElementById('growthRate').value = 0.07;
+            document.getElementById('existingCorpus').value = 120.00;
+            document.getElementById('employeeRate').value = 0.10;
+            document.getElementById('employerRate').value = 0.14;
+            document.getElementById('annualReturn').value = 0.095;
+            document.getElementById('annuityRate').value = 0.07;
+            document.getElementById('postRetGrowth').value = 0.05;
+            document.getElementById('corpusReturn').value = 0.08;
+            document.getElementById('employeeLife').value = 20;
+            document.getElementById('spouseAdditional').value = 10;
+            document.getElementById('joinAge').value = 28;
+            document.getElementById('results').textContent = '';
         }
     </script>
 </body>

@@ -65,7 +65,7 @@ The calculator will prompt for various inputs. You can press Enter to use the de
           Standard employee contribution rate as per government rules
     \item Employer Contribution Rate [14\%] \\
           Current government contribution rate to NPS
-    \item Expected Annual Return on NPS [8\%] \\
+    \item Expected Annual Return on NPS [9.5\%] \\
           Conservative estimate based on historical NPS returns
     \item Annuity Conversion Rate without return of purchase price [7\%] \\
           Default annuity rate used for pension conversion without return of purchase price
@@ -86,23 +86,26 @@ The calculator provides:
     \item Monthly pension under UPS scheme for:
     \begin{itemize}
         \item Employee (Proportional to service, up to 50\% of final basic salary if service is 25 years or more)
-        \item Spouse (50\% of employee's pension after employee's death)
+        \item Spouse (60\% of employee's pension after employee's death)
     \end{itemize}
     \item UPS lump sum amount at retirement, calculated as 1/10th of the last drawn monthly basic pay (plus Dearness Allowance) for every completed six months of qualifying service.
-    \item Projected value of the UPS lump sum if invested at the same rate as the NPS 60\% lump sum.
+    \item Projected value of the UPS lump sum if invested at the same post-tax rate as the NPS 60\% lump sum.
+    \item Yearly UPS return on investment (added to UPS pension for comparison)
     \item Total NPS corpus at retirement
     \item Monthly pension from NPS annuity (40\% of corpus)
     \item Lump sum amount available (60\% of corpus)
     \item Year-by-year analysis showing:
     \begin{itemize}
         \item Separate phases for employee and spouse periods
-        \item UPS pension amount (reducing to 50\% for spouse)
+        \item UPS pension amount (reducing to 60\% for spouse)
+        \item UPS lump sum return (added to UPS pension for comparison)
         \item NPS annuity amount (remains constant for both phases)
-        \item Yearly difference to be covered by corpus
-        \item Interest earned on remaining corpus
+        \item Yearly difference to be covered by corpus (difference between UPS pension + UPS lump sum return and NPS annuity + NPS corpus return)
+        \item Interest earned on remaining corpus (NPS 60\% lump sum)
+        \item Interest earned on UPS lump sum (if invested)
         \item Remaining corpus balance
     \end{itemize}
-    \item Analysis of whether the corpus will last through both employee and spouse lifetimes
+    \item Analysis of whether the corpus will last through both employee and spouse lifetimes. The corpus is considered perpetual if NPS annuity + NPS corpus return matches or exceeds UPS pension + UPS lump sum return.
 \end{itemize}
 
 \section{Important Notes}
@@ -112,7 +115,7 @@ The calculator provides:
     \item UPS pension calculation:
     \begin{itemize}
         \item Employee receives a pension proportional to their years of service. If service is 25 years or more, pension is 50\% of final basic salary. Otherwise, it is (years of service / 25) * 50\% of final basic salary.
-        \item Spouse receives 50\% of employee's pension after employee's death
+        \item Spouse receives 60\% of employee's pension after employee's death
         \item UPS pension grows at specified rate (default 5\%) for both phases
     \end{itemize}
     \item NPS features:
@@ -139,6 +142,7 @@ The browser interface includes several convenient features:
     \item Immediate recalculation with new inputs
     \item Results displayed in a clean, formatted layout
     \item Ability to easily try different scenarios by changing values
+    \item \textbf{Reset to Defaults} button to quickly restore all input fields to their original default values
 \end{itemize}
 
 \end{document}

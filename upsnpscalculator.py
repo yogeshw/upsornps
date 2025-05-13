@@ -5,6 +5,7 @@ from typing import Union
 
 # --- Constants ---
 UPS_PENSION_FACTOR: float = 0.5
+UPS_SPOUSE_FACTOR: float = 0.6
 NPS_ANNUITY_PORTION: float = 0.4
 NPS_LUMP_SUM_PORTION: float = 0.6
 MONTHS_PER_YEAR: int = 12
@@ -68,9 +69,16 @@ def format_amount(amount: float) -> str:
         return f"{amount/1000:.2f}K"
     return f"{amount:.2f}"
 
-def calculate_corpus_depletion_years(initial_corpus: float, ups_monthly_initial: float, nps_monthly: float, 
-                                employee_life_years: int, spouse_additional_years: int,
-                                post_ret_growth: float = 0.05, corpus_return: float = 0.08) -> Union[int, float]:
+def calculate_corpus_depletion_years(
+    initial_corpus: float,
+    ups_monthly_initial: float,
+    nps_monthly: float,
+    employee_life_years: int,
+    spouse_additional_years: int,
+    post_ret_growth: float = 0.05,
+    corpus_return: float = 0.08,
+    ups_lump_sum: float = 0.0
+) -> Union[int, float]:
     """
     Calculate how many years the NPS lump sum corpus will last while covering pension differences.
     
@@ -82,9 +90,9 @@ def calculate_corpus_depletion_years(initial_corpus: float, ups_monthly_initial:
         spouse_additional_years (int): Additional years spouse will live after employee's death.
         post_ret_growth (float): Annual growth rate of UPS pension.
         corpus_return (float): Annual return on remaining corpus.
-    
+        ups_lump_sum (float): UPS lump sum corpus invested to earn returns.
     Returns:
-        Union[int, float]: Number of years the corpus lasts, or float('inf') if it never depletes.
+      Union[int, float]: Number of years the corpus lasts, or float('inf') if it never depletes.
     """
     corpus: float = initial_corpus
     year: int = 0
@@ -92,28 +100,41 @@ def calculate_corpus_depletion_years(initial_corpus: float, ups_monthly_initial:
     total_years: int = employee_life_years + spouse_additional_years
     yearly_nps: float = nps_monthly * MONTHS_PER_YEAR # Calculate constant NPS yearly amount once
     
-    print("\nYear-by-year NPS Corpus Analysis:")
-    print("Year  UPS Monthly  NPS Monthly  Yearly Difference  Interest Earned    Corpus Balance  Phase")
+    print("\nYear-by-year Corpus Analysis with Returns:")
+    print(
+        "Year  UPS Monthly  NPS Monthly  Yearly Diff.  NPS Return  UPS Return  Corpus Balance  Phase"
+    )
     print("-" * 95)
     
+    post_tax_corpus_return = corpus_return
     while corpus > 0 and year < total_years:
         is_spouse_phase: bool = year >= employee_life_years
-        current_ups: float = ups_monthly * (UPS_PENSION_FACTOR if is_spouse_phase else 1.0) # Use constant
+        current_ups: float = ups_monthly * (UPS_SPOUSE_FACTOR if is_spouse_phase else 1.0)
         phase: str = "Spouse" if is_spouse_phase else "Employee"
-        
+
         yearly_ups: float = current_ups * MONTHS_PER_YEAR
-        yearly_difference: float = yearly_ups - yearly_nps
-        interest_earned: float = corpus * corpus_return
-        
-        print(f"{year:4d}  {format_amount(current_ups):>10}  {format_amount(nps_monthly):>10}  "
-              f"{format_amount(yearly_difference):>16}  {format_amount(interest_earned):>14}  "
-              f"{format_amount(corpus):>14}  {phase:>7}")
-        
-        if year == 0 and interest_earned >= yearly_difference: # Simplified check
-            print("\nThe corpus will never deplete as the investment returns cover the pension difference perpetually!")
+        ups_return: float = ups_lump_sum * post_tax_corpus_return
+        total_ups_income: float = yearly_ups + ups_return
+        nps_return: float = corpus * post_tax_corpus_return
+        total_nps_income: float = (nps_monthly * MONTHS_PER_YEAR) + nps_return
+        yearly_difference: float = total_nps_income - total_ups_income
+
+        print(
+            f"{year:4d}  {format_amount(current_ups):>10}  {format_amount(nps_monthly):>10}  "
+            f"{format_amount(yearly_difference):>11}  {format_amount(nps_return):>10}  "
+            f"{format_amount(ups_return):>10}  {format_amount(corpus):>14}  {phase:>7}"
+        )
+
+        # Correct corpus update: corpus grows by post-tax return, then is reduced by (UPS+UPS return)-(NPS+NPS return) if UPS+UPS return > NPS+NPS return
+        # Correct corpus update: corpus grows by post-tax return, then is reduced by (UPS+UPS return)-(NPS+NPS return) if UPS+UPS return > NPS+NPS return
+        corpus -= max(0, total_ups_income - total_nps_income)
+        corpus = corpus * (1 + post_tax_corpus_return)
+
+        # Perpetual check: if NPS annuity + NPS corpus return >= UPS pension + UPS lump sum return, corpus will never deplete
+        if year == 0 and total_nps_income >= total_ups_income:
+            print("\nThe corpus will never deplete as the post-tax investment returns and NPS annuity cover the UPS pension plus UPS lump sum returns perpetually!")
             return float('inf')
-        
-        corpus = (corpus * (1 + corpus_return)) - yearly_difference
+
         ups_monthly *= (1 + post_ret_growth)
         year += 1
     
@@ -196,8 +217,8 @@ def main():
         employer_rate = 0.14 if employer_rate_input == "" else float(employer_rate_input)
         total_contrib_rate = employee_rate + employer_rate
         
-        annual_return_input = input("Enter expected annual return on NPS contributions [0.08 for 8%]: ")
-        annual_return = 0.08 if annual_return_input == "" else float(annual_return_input)
+        annual_return_input = input("Enter expected annual return on NPS contributions [0.095 for 9.5%]: ")
+        annual_return = 0.095 if annual_return_input == "" else float(annual_return_input)
         
         annuity_rate_input = input("Enter the annuity conversion rate at retirement without return of purchase price [0.07 for 7%]: ")
         annuity_rate = 0.07 if annuity_rate_input == "" else float(annuity_rate_input)
@@ -221,6 +242,8 @@ def main():
         if years_of_service < 0:
             print("Join age must be less than or equal to retirement age.")
             return
+
+        # Tax rate input removed; all returns are now pre-tax
         
     except ValueError:
         print("Invalid input. Please enter numeric values.")
@@ -251,12 +274,13 @@ def main():
     print("\nEstimated Results at Retirement:")
     print(f"  Final basic salary: {format_amount(final_salary)}")
     print(f"  UPS estimated monthly pension (employee): {format_amount(ups_monthly)}")
-    print(f"  UPS estimated monthly pension (spouse): {format_amount(ups_monthly * 0.5)}")
+    print(f"  UPS estimated monthly pension (spouse): {format_amount(ups_monthly * UPS_SPOUSE_FACTOR)}")
     print(f"  UPS lump sum amount: {format_amount(ups_lump_sum_amount)}")
     if ups_lump_sum_amount > 0 and total_coverage_needed > 0 and corpus_return > 0:
         projected_ups_lump_sum = ups_lump_sum_amount * ((1 + corpus_return) ** total_coverage_needed)
         print(f"    (Projected value after {total_coverage_needed} years if invested at {corpus_return:.2%}: {format_amount(projected_ups_lump_sum)})")
-    
+    print(f"  Yearly UPS return on investment: {format_amount(ups_lump_sum_amount * corpus_return)}")
+
     print(f"  NPS accumulated corpus: {format_amount(corpus)}")
     print(f"  NPS estimated monthly pension (constant for both): {format_amount(nps_monthly)}")
     print(f"  NPS lump sum amount (60%): {format_amount(nps_lump_sum)})")
@@ -270,14 +294,22 @@ def main():
         print("  Note: Since spouse's additional years is negative, coverage is needed only until employee's death")
     
     # Calculate how long the NPS 60% corpus will last
-    depletion_years = calculate_corpus_depletion_years(nps_lump_sum, ups_monthly, nps_monthly,
-                                                      employee_life_years, spouse_additional_years,
-                                                      post_ret_growth, corpus_return)
+    # Calculate how long the NPS 60% corpus will last, including UPS lump sum investment
+    depletion_years = calculate_corpus_depletion_years(
+        nps_lump_sum,
+        ups_monthly,
+        nps_monthly,
+        employee_life_years,
+        spouse_additional_years,
+        post_ret_growth,
+        corpus_return,
+        ups_lump_sum_amount
+    )
     
     # Post-retirement analysis for NPS lump sum
     print("\nPost-Retirement Analysis (for NPS lump sum):")
     if depletion_years == float('inf'):
-        print("  The NPS corpus will NEVER deplete as the investment returns")
+        print("  The NPS corpus will NEVER deplete as the post-tax investment returns")
         print("  cover the pension difference perpetually!")
     else:
         print(f"  The NPS corpus will last approximately {depletion_years:.1f} years")
@@ -285,14 +317,14 @@ def main():
             shortfall_years = total_coverage_needed - depletion_years
             print(f"  WARNING: This is {shortfall_years:.1f} years short of the total needed coverage period!")
         print("  while covering the difference between UPS and NPS pensions")
-        # Calculate minimum return rate on 60% corpus to last perpetually
+        # Calculate minimum post-tax return rate on 60% corpus to last perpetually
         yearly_ups = ups_monthly * MONTHS_PER_YEAR
         yearly_nps = nps_monthly * MONTHS_PER_YEAR
         difference = yearly_ups - yearly_nps
         # Ensure nps_lump_sum is not zero to avoid division by zero error
         if nps_lump_sum > 0:
             min_return_rate = difference / nps_lump_sum
-            print(f"  Minimum return rate on the NPS 60% corpus to last perpetually: {min_return_rate:.2%}")
+            print(f"  Minimum post-tax return rate on the NPS 60% corpus to last perpetually: {min_return_rate:.2%}")
         else:
             print("  NPS lump sum is zero, cannot calculate minimum return rate for perpetuity.")
 
