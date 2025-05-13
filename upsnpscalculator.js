@@ -89,8 +89,8 @@ function calculateCorpusDepletionYears(
     const yearlyNps = npsMonthly * MONTHS_PER_YEAR; // Calculate constant NPS yearly amount once
     
     console.log("\nYear-by-year NPS Corpus Analysis:");
-    console.log("Year  UPS Monthly  NPS Monthly  Yearly Diff.  NPS Return  UPS Return    Corpus Balance  Phase");
-    console.log("-".repeat(95));
+    console.log("Year  UPS Pension  UPS Return  Total UPS   NPS Annuity  NPS Return  Total NPS   Diff(UPS-NPS)  Corpus Balance  Phase");
+    console.log("-".repeat(120));
     
     let minReturnRate = null;
     while (corpus > 0 && year < totalYears) {
@@ -102,16 +102,19 @@ function calculateCorpusDepletionYears(
         const upsReturn = upsLumpSum * corpusReturn;
         const totalUpsIncome = yearlyUps + upsReturn;
         const interestEarned = corpus * corpusReturn;
-        const totalNpsIncome = (npsMonthly * MONTHS_PER_YEAR) + interestEarned;
-        const yearlyDifference = totalNpsIncome - totalUpsIncome;
+        const yearlyNps = npsMonthly * MONTHS_PER_YEAR;
+        const totalNpsIncome = yearlyNps + interestEarned;
+        const yearlyDifference = totalUpsIncome - totalNpsIncome;
 
         console.log(
             `${year.toString().padStart(4)}  ` +
-            `${formatAmount(currentUps).padStart(10)}  ` +
-            `${formatAmount(npsMonthly).padStart(10)}  ` +
-            `${formatAmount(yearlyDifference).padStart(11)}  ` +
-            `${formatAmount(interestEarned).padStart(10)}  ` +
+            `${formatAmount(yearlyUps).padStart(10)}  ` +
             `${formatAmount(upsReturn).padStart(10)}  ` +
+            `${formatAmount(totalUpsIncome).padStart(10)}  ` +
+            `${formatAmount(yearlyNps).padStart(11)}  ` +
+            `${formatAmount(interestEarned).padStart(10)}  ` +
+            `${formatAmount(totalNpsIncome).padStart(10)}  ` +
+            `${formatAmount(yearlyDifference).padStart(13)}  ` +
             `${formatAmount(corpus).padStart(14)}  ` +
             `${phase.padStart(7)}`
         );
@@ -119,7 +122,7 @@ function calculateCorpusDepletionYears(
         if (year === 0) {
             minReturnRate = yearlyDifference / initialCorpus;
         }
-        if (year === 0 && interestEarned + npsMonthly * MONTHS_PER_YEAR >= yearlyUps + upsReturn) {
+        if (year === 0 && totalNpsIncome >= totalUpsIncome) {
             console.log("\nThe corpus will never deplete as the investment returns and NPS annuity cover the UPS pension plus UPS lump sum returns perpetually!");
             if (minReturnRate !== null && isFinite(minReturnRate)) {
                 console.log(`Minimum return rate on the 60% corpus below which it will not last perpetually: ${(minReturnRate * 100).toFixed(2)}%`);
@@ -128,9 +131,9 @@ function calculateCorpusDepletionYears(
         }
 
         // Correct corpus update: corpus grows by return, then is reduced by (UPS+UPS return)-(NPS+NPS return) if UPS+UPS return > NPS+NPS return
-        // Correct corpus update: corpus is first reduced by (UPS+UPS return)-(NPS+NPS return) if UPS+UPS return > NPS+NPS return, then grows by return
-        corpus -= Math.max(0, totalUpsIncome - totalNpsIncome);
+        
         corpus = corpus * (1 + corpusReturn);
+        corpus -= Math.max(0, totalUpsIncome - totalNpsIncome);
         upsMonthly *= (1 + postRetGrowth);
         year++;
     }

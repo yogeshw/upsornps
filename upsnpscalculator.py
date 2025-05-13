@@ -101,12 +101,11 @@ def calculate_corpus_depletion_years(
     yearly_nps: float = nps_monthly * MONTHS_PER_YEAR # Calculate constant NPS yearly amount once
     
     print("\nYear-by-year Corpus Analysis with Returns:")
-    print(
-        "Year  UPS Monthly  NPS Monthly  Yearly Diff.  NPS Return  UPS Return  Corpus Balance  Phase"
-    )
-    print("-" * 95)
+    print("Year  UPS Pension  UPS Return  Total UPS   NPS Annuity  NPS Return  Total NPS   Diff(UPS-NPS)  Corpus Balance  Phase")
+    print("-" * 120)
     
     post_tax_corpus_return = corpus_return
+
     while corpus > 0 and year < total_years:
         is_spouse_phase: bool = year >= employee_life_years
         current_ups: float = ups_monthly * (UPS_SPOUSE_FACTOR if is_spouse_phase else 1.0)
@@ -116,16 +115,16 @@ def calculate_corpus_depletion_years(
         ups_return: float = ups_lump_sum * post_tax_corpus_return
         total_ups_income: float = yearly_ups + ups_return
         nps_return: float = corpus * post_tax_corpus_return
-        total_nps_income: float = (nps_monthly * MONTHS_PER_YEAR) + nps_return
-        yearly_difference: float = total_nps_income - total_ups_income
+        yearly_nps: float = nps_monthly * MONTHS_PER_YEAR
+        total_nps_income: float = yearly_nps + nps_return
+        yearly_difference: float = total_ups_income - total_nps_income
 
         print(
-            f"{year:4d}  {format_amount(current_ups):>10}  {format_amount(nps_monthly):>10}  "
-            f"{format_amount(yearly_difference):>11}  {format_amount(nps_return):>10}  "
-            f"{format_amount(ups_return):>10}  {format_amount(corpus):>14}  {phase:>7}"
+            f"{year:4d}  {format_amount(yearly_ups):>10}  {format_amount(ups_return):>10}  {format_amount(total_ups_income):>10}  "
+            f"{format_amount(yearly_nps):>11}  {format_amount(nps_return):>10}  {format_amount(total_nps_income):>10}  "
+            f"{format_amount(yearly_difference):>13}  {format_amount(corpus):>14}  {phase:>7}"
         )
 
-        # Correct corpus update: corpus grows by post-tax return, then is reduced by (UPS+UPS return)-(NPS+NPS return) if UPS+UPS return > NPS+NPS return
         # Correct corpus update: corpus grows by post-tax return, then is reduced by (UPS+UPS return)-(NPS+NPS return) if UPS+UPS return > NPS+NPS return
         corpus -= max(0, total_ups_income - total_nps_income)
         corpus = corpus * (1 + post_tax_corpus_return)
